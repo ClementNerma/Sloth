@@ -14,8 +14,8 @@ use std::{
 fn main() -> Result<(), &'static str> {
     let mut args = args().skip(1);
 
-    let secret = args.next().ok_or("Please provide a secret password")?;
     let backup_dir = args.next().ok_or("Please provide a backup directory")?;
+    let secret = args.next().ok_or("Please provide a secret password")?;
 
     let backup_dir = Path::new(&backup_dir);
 
