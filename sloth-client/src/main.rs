@@ -15,6 +15,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut args = args().skip(1);
 
     let server_url = args.next().ok_or("Please provide a server URL")?;
+    let server_secret = args.next().ok_or("Please provide the server's secret")?;
     let slot_name = args.next().ok_or("Please provide a slot name")?;
     let slot_file = args.next().ok_or("Please provide a file to backup")?;
 
@@ -35,6 +36,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("| Connecting to server...");
 
     let mut stream = TcpStream::connect(server_url)?;
+
+    println!("| Sending server's secret...");
+
+    stream.write_all(format!("{server_secret}\n").as_bytes())?;
 
     println!("| Sending slot name...");
 

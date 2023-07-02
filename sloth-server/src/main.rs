@@ -14,7 +14,9 @@ use std::{
 fn main() -> Result<(), &'static str> {
     let mut args = args().skip(1);
 
+    let secret = args.next().ok_or("Please provide a secret password")?;
     let backup_dir = args.next().ok_or("Please provide a backup directory")?;
+
     let backup_dir = Path::new(&backup_dir);
 
     if !backup_dir.is_dir() {
@@ -34,7 +36,7 @@ fn main() -> Result<(), &'static str> {
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                if let Err(err) = handle_connection(backup_dir, stream) {
+                if let Err(err) = handle_connection(backup_dir, &secret, stream) {
                     eprintln!("| Connection handling failed: {err}");
                 }
             }
@@ -53,10 +55,24 @@ fn main() -> Result<(), &'static str> {
     Ok(())
 }
 
-fn handle_connection(backup_dir: &Path, mut stream: TcpStream) -> Result<(), Box<dyn Error>> {
+fn handle_connection(
+    backup_dir: &Path,
+    secret: &str,
+    mut stream: TcpStream,
+) -> Result<(), Box<dyn Error>> {
     println!("> Got a new connection");
 
     let mut buf_reader = BufReader::new(&mut stream);
+
+    println!("| Waiting for secret password...");
+
+    let req_secret = read_line(&mut buf_reader)?;
+
+    if req_secret != secret {
+        return Err(format!(
+            "Invalid secret was provided ('{req_secret}' instead of '{secret}')"
+        ))?;
+    }
 
     println!("| Waiting for slot name...");
 
