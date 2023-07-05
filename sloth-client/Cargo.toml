@@ -2,5 +2,7 @@
 name = "sloth-client"
 version = "0.1.0"
 edition = "2021"
+description = "Sloth client for backuping small data files to a server"
+license = "Apache-2.0"
 
 [dependencies]
